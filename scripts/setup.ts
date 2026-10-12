@@ -25,7 +25,8 @@ export function configure(source: string, token: string): string {
   Object.assign(config, { model_provider: provider, model_catalog_json: join(stateDir, 'mixed-models.json') });
   for (const key of ['model_context_window', 'model_auto_compact_token_limit', 'model_reasoning_summary']) delete config[key];
   const providers = (config.model_providers ??= {}) as TomlTable;
-  providers[provider] = { name: 'Local subscriptions', base_url: 'http://127.0.0.1:19382/gateway', wire_api: 'responses', supports_websockets: false, requires_openai_auth: true, request_max_retries: 0, stream_max_retries: 0, http_headers: { 'X-Codex-Claude-Key': token } };
+  // Retry failed HTTP requests; do not automatically replay interrupted response streams.
+  providers[provider] = { name: 'Local subscriptions', base_url: 'http://127.0.0.1:19382/gateway', wire_api: 'responses', supports_websockets: false, requires_openai_auth: true, request_max_retries: 8, stream_max_retries: 0, http_headers: { 'X-Codex-Claude-Key': token } };
   return stringify(config);
 }
 

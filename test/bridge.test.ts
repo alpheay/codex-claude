@@ -345,6 +345,9 @@ test('provider switch and rollback preserve unrelated settings and later edits',
   const original = 'model = "gpt-original"\nservice_tier = "priority"\n[features]\njs_repl = true\n[model_providers.existing]\nname = "Keep me"\n';
   const configured = configure(original, 'test-local-key');
   assert.equal(parse(configured).model_provider, 'subscription-router');
+  const provider = (parse(configured).model_providers as Record<string, Record<string, unknown>>)['subscription-router'];
+  assert.equal(provider.request_max_retries, 8);
+  assert.equal(provider.stream_max_retries, 0);
   assert.deepEqual(parse(restore(configured, original)), parse(original));
   const changed = configured.replace('js_repl = true', 'js_repl = false');
   assert.deepEqual(parse(restore(changed, original)), parse(original.replace('js_repl = true', 'js_repl = false')));
